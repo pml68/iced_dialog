@@ -16,12 +16,12 @@ iced_widget.workspace = true
 iced_core.workspace = true
 
 [workspace.dependencies.iced_widget]
-git = "https://github.com/iced-rs/iced"
-branch = "master"
+git = "https://github.com/pml68/iced"
+branch = "feat/rehighlight-on-redraw"
 
 [workspace.dependencies.iced_core]
-git = "https://github.com/iced-rs/iced"
-branch = "master"
+git = "https://github.com/pml68/iced"
+branch = "feat/rehighlight-on-redraw"
 features = ["advanced"]
 
 [workspace]
