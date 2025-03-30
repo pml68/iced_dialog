@@ -1,0 +1,3 @@
+[alias]
+lint = "clippy --no-deps -- -D warnings"
+lint-all = "clippy --no-deps -- -D clippy::pedantic"
