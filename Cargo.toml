@@ -58,7 +58,7 @@ useless_conversion = "deny"
 broken_intra_doc_links = "forbid"
 
 [patch.crates-io]
-iced_widget = { git = "https://github.com/iced-rs/iced", branch = "master" }
-iced_core = { git = "https://github.com/iced-rs/iced", branch = "master" }
-iced = { git = "https://github.com/iced-rs/iced", branch = "master" }
-iced_test = { git = "https://github.com/iced-rs/iced", branch = "master" }
+iced_widget = { git = "https://github.com/pml68/iced", branch = "feat/rehighlight-on-redraw" }
+iced_core = { git = "https://github.com/pml68/iced", branch = "feat/rehighlight-on-redraw" }
+iced = { git = "https://github.com/pml68/iced", branch = "feat/rehighlight-on-redraw" }
+iced_test = { git = "https://github.com/pml68/iced", branch = "feat/rehighlight-on-redraw" }
