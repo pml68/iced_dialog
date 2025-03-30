@@ -18,7 +18,6 @@ iced_core.workspace = true
 [workspace.dependencies.iced_widget]
 git = "https://github.com/iced-rs/iced"
 branch = "master"
-features = ["advanced"]
 
 [workspace.dependencies.iced_core]
 git = "https://github.com/iced-rs/iced"
