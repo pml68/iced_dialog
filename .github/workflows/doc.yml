@@ -6,6 +6,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   pages:
     runs-on: ubuntu-latest
@@ -13,10 +16,14 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
       - name: Build documentation
-        run: cargo doc --verbose
+        run: cargo doc --verbose --no-deps
+      - name: Write CNAME file
+        run: echo 'iced-dialog.pml68.dev' > ./target/doc/CNAME
+      - name: Copy redirect file as index.html
+        run: cp docs/redirect.html target/doc/index.html
       - name: Deploy documentation
-        uses: peaceiris/actions-gh-pages@v4
         if: github.ref == 'refs/heads/master'
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/doc
