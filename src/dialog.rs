@@ -1,7 +1,7 @@
 //! Dialogs can be used to provide users with
 //! important information and make them act on it.
 use iced_core::{
-    self as core, Alignment, Element, Length, Padding, Pixels,
+    self as core, Alignment, Color, Element, Length, Padding, Pixels,
     alignment::Vertical, color,
 };
 use iced_widget::{
@@ -31,6 +31,7 @@ where
     spacing: f32,
     padding: Padding,
     button_alignment: Alignment,
+    backdrop_color: Box<dyn Fn(&Theme) -> Color + 'a>,
     title_class: <Theme as text::Catalog>::Class<'a>,
     container_class: <Theme as container::Catalog>::Class<'a>,
 }
@@ -71,6 +72,7 @@ where
             spacing: 8.0,
             padding: 24.into(),
             button_alignment: Alignment::Start,
+            backdrop_color: Box::new(|_theme| color!(0x000000, 0.3)),
             title_class: <Theme as Catalog>::default_title(),
             container_class: <Theme as Catalog>::default_container(),
         }
@@ -149,6 +151,12 @@ where
         buttons.into_iter().fold(self, Self::push_button)
     }
 
+    /// Sets the coloring method for the [`Dialog`]'s backdrop.
+    pub fn backdrop(mut self, color: impl Fn(&Theme) -> Color + 'a) -> Self {
+        self.backdrop_color = Box::new(color);
+        self
+    }
+
     /// Sets the style of the [`Dialog`]'s title.
     #[must_use]
     pub fn title_style(
@@ -218,7 +226,7 @@ where
             .class(self.container_class)
             .clip(true);
 
-            modal(self.base, dialog)
+            modal(self.base, dialog, self.backdrop_color)
         } else {
             self.base
         }
@@ -242,6 +250,7 @@ where
 fn modal<'a, Message, Theme, Renderer>(
     base: impl Into<Element<'a, Message, Theme, Renderer>>,
     content: impl Into<Element<'a, Message, Theme, Renderer>>,
+    backdrop_color: impl Fn(&Theme) -> Color + 'a,
 ) -> Element<'a, Message, Theme, Renderer>
 where
     Message: 'a + Clone,
@@ -249,11 +258,12 @@ where
     Theme: 'a + container::Catalog,
     Theme::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
-    let area =
-        mouse_area(center(opaque(content)).style(|_theme| container::Style {
-            background: Some(color!(0x000000, 0.3).into()),
+    let area = mouse_area(center(opaque(content)).style(move |theme| {
+        container::Style {
+            background: Some(backdrop_color(theme).into()),
             ..Default::default()
-        }));
+        }
+    }));
 
     stack![base.into(), opaque(area)].into()
 }
