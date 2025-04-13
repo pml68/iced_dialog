@@ -144,7 +144,7 @@ where
     }
 
     /// Extends the [`Dialog`] with the given buttons.
-    pub fn extend(
+    pub fn extend_buttons(
         self,
         buttons: impl IntoIterator<Item = Element<'a, Message, Theme, Renderer>>,
     ) -> Self {

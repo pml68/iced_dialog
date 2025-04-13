@@ -18,7 +18,7 @@ enum Message {
 }
 
 fn main() -> iced::Result {
-    iced::run("Dialog Example", State::update, State::view)
+    iced::run(State::update, State::view)
 }
 
 impl State {
