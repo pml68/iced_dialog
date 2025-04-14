@@ -31,7 +31,7 @@ where
     spacing: f32,
     padding: Padding,
     button_alignment: Alignment,
-    backdrop_color: Box<dyn Fn(&Theme) -> Color + 'a>,
+    class: <Theme as Catalog>::Class<'a>,
     title_class: <Theme as text::Catalog>::Class<'a>,
     container_class: <Theme as container::Catalog>::Class<'a>,
 }
@@ -41,8 +41,6 @@ where
     Renderer: 'a + core::Renderer + core::text::Renderer,
     Theme: 'a + Catalog,
     Message: 'a + Clone,
-    <Theme as container::Catalog>::Class<'a>:
-        From<container::StyleFn<'a, Theme>>,
 {
     /// Creates a new [`Dialog`] with the given base and dialog content.
     pub fn new(
@@ -72,7 +70,7 @@ where
             spacing: 8.0,
             padding: 24.into(),
             button_alignment: Alignment::Start,
-            backdrop_color: Box::new(|_theme| color!(0x000000, 0.3)),
+            class: <Theme as Catalog>::default(),
             title_class: <Theme as Catalog>::default_title(),
             container_class: <Theme as Catalog>::default_container(),
         }
@@ -151,9 +149,13 @@ where
         buttons.into_iter().fold(self, Self::push_button)
     }
 
-    /// Sets the coloring method for the [`Dialog`]'s backdrop.
-    pub fn backdrop(mut self, color: impl Fn(&Theme) -> Color + 'a) -> Self {
-        self.backdrop_color = Box::new(color);
+    /// Sets the style of the [`Dialog`].
+    #[must_use]
+    pub fn style(mut self, style: impl Fn(&Theme) -> Style + 'a) -> Self
+    where
+        <Theme as Catalog>::Class<'a>: From<StyleFn<'a, Theme>>,
+    {
+        self.class = (Box::new(style) as StyleFn<'a, Theme>).into();
         self
     }
 
@@ -185,7 +187,42 @@ where
         self
     }
 
-    fn view(self) -> Element<'a, Message, Theme, Renderer> {
+    /// Sets the style class of the [`Dialog`].
+    #[must_use]
+    pub fn class(
+        mut self,
+        class: impl Into<<Theme as Catalog>::Class<'a>>,
+    ) -> Self {
+        self.class = class.into();
+        self
+    }
+
+    /// Sets the style class of the [`Dialog`]'s title.
+    #[must_use]
+    pub fn title_class(
+        mut self,
+        class: impl Into<<Theme as text::Catalog>::Class<'a>>,
+    ) -> Self {
+        self.title_class = class.into();
+        self
+    }
+
+    /// Sets the style class of the [`Dialog`]'s container.
+    #[must_use]
+    pub fn container_class(
+        mut self,
+        class: impl Into<<Theme as container::Catalog>::Class<'a>>,
+    ) -> Self {
+        self.container_class = class.into();
+        self
+    }
+
+    fn view(self) -> Element<'a, Message, Theme, Renderer>
+    where
+        <Theme as container::Catalog>::Class<'a>:
+            From<container::StyleFn<'a, Theme>>,
+        <Theme as Catalog>::Class<'a>: Into<StyleFn<'a, Theme>>,
+    {
         if self.is_open {
             let contents = Container::new(
                 Column::new()
@@ -226,7 +263,7 @@ where
             .class(self.container_class)
             .clip(true);
 
-            modal(self.base, dialog, self.backdrop_color)
+            modal(self.base, dialog, self.class)
         } else {
             self.base
         }
@@ -241,6 +278,7 @@ where
     Message: 'a + Clone,
     <Theme as container::Catalog>::Class<'a>:
         From<container::StyleFn<'a, Theme>>,
+    <Theme as Catalog>::Class<'a>: Into<StyleFn<'a, Theme>>,
 {
     fn from(dialog: Dialog<'a, Message, Theme, Renderer>) -> Self {
         dialog.view()
@@ -250,17 +288,21 @@ where
 fn modal<'a, Message, Theme, Renderer>(
     base: impl Into<Element<'a, Message, Theme, Renderer>>,
     content: impl Into<Element<'a, Message, Theme, Renderer>>,
-    backdrop_color: impl Fn(&Theme) -> Color + 'a,
+    class: <Theme as Catalog>::Class<'a>,
 ) -> Element<'a, Message, Theme, Renderer>
 where
     Message: 'a + Clone,
     Renderer: 'a + core::Renderer,
-    Theme: 'a + container::Catalog,
-    Theme::Class<'a>: From<container::StyleFn<'a, Theme>>,
+    Theme: 'a + container::Catalog + Catalog,
+    <Theme as container::Catalog>::Class<'a>:
+        From<container::StyleFn<'a, Theme>>,
+    <Theme as Catalog>::Class<'a>: Into<StyleFn<'a, Theme>>,
 {
+    let style = class.into();
+
     let area = mouse_area(center(opaque(content)).style(move |theme| {
         container::Style {
-            background: Some(backdrop_color(theme).into()),
+            background: Some(style(theme).backdrop_color.into()),
             ..Default::default()
         }
     }));
@@ -268,8 +310,21 @@ where
     stack![base.into(), opaque(area)].into()
 }
 
+/// The style of a [`Dialog`].
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Style {
+    /// The [`Dialog`]'s backdrop.
+    pub backdrop_color: Color,
+}
+
 /// The theme catalog of a [`Dialog`].
 pub trait Catalog: text::Catalog + container::Catalog {
+    /// The item class of the [`Catalog`].
+    type Class<'a>;
+
+    /// The default class produced by the [`Catalog`].
+    fn default<'a>() -> <Self as Catalog>::Class<'a>;
+
     /// The default class for the [`Dialog`]'s title.
     fn default_title<'a>() -> <Self as text::Catalog>::Class<'a> {
         <Self as text::Catalog>::default()
@@ -279,14 +334,37 @@ pub trait Catalog: text::Catalog + container::Catalog {
     fn default_container<'a>() -> <Self as container::Catalog>::Class<'a> {
         <Self as container::Catalog>::default()
     }
+
+    /// The [`Style`] of a class.
+    fn style(&self, class: <Self as Catalog>::Class<'_>) -> Style;
 }
 
+/// A styling function for a [`Dialog`].
+pub type StyleFn<'a, Theme> = Box<dyn Fn(&Theme) -> Style + 'a>;
+
 impl Catalog for Theme {
+    type Class<'a> = StyleFn<'a, Self>;
+
+    fn default<'a>() -> <Self as Catalog>::Class<'a> {
+        Box::new(default)
+    }
+
     fn default_container<'a>() -> <Self as container::Catalog>::Class<'a> {
         Box::new(|theme| {
             container::background(
                 theme.extended_palette().background.base.color,
             )
         })
+    }
+
+    fn style(&self, class: <Self as Catalog>::Class<'_>) -> Style {
+        class(self)
+    }
+}
+
+/// The default style of a [`Dialog`].
+pub fn default(_theme: &Theme) -> Style {
+    Style {
+        backdrop_color: color!(0x000000, 0.3),
     }
 }

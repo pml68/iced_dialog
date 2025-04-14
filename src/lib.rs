@@ -30,6 +30,7 @@ where
 /// [`Button`]: https://docs.iced.rs/iced/widget/struct.Button.html
 pub fn button<'a, Message, Theme, Renderer>(
     content: &'a str,
+    message: Message,
 ) -> Button<'a, Message, Theme, Renderer>
 where
     Theme: 'a + iced_widget::button::Catalog + text::Catalog,
@@ -41,6 +42,7 @@ where
             .line_height(text::LineHeight::Absolute(core::Pixels(20.0)))
             .align_x(Horizontal::Center),
     )
+    .on_press(message)
     .height(32)
     .width(core::Length::Fill)
 }
