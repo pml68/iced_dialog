@@ -1,8 +1,8 @@
 use iced::{
-    Element, Length, Task,
-    widget::{center, column, text},
+    Element, Length, Task, color,
+    widget::{button, center, column, text},
 };
-use iced_dialog::{button, dialog};
+use iced_dialog::dialog;
 
 #[derive(Default)]
 struct State {
@@ -41,8 +41,7 @@ impl State {
         let base = center(
             column![
                 text(&self.action_text),
-                iced::widget::button("Open Dialog")
-                    .on_press(Message::OpenDialog)
+                button("Open Dialog").on_press(Message::OpenDialog)
             ]
             .spacing(14.0),
         )
@@ -53,8 +52,8 @@ impl State {
 
         dialog(self.is_open, base, dialog_content)
             .title("Save")
-            .push_button(button("Save").on_press(Message::Saved))
-            .push_button(button("Cancel").on_press(Message::Cancelled))
+            .push_button(iced_dialog::button("Save", Message::Saved))
+            .push_button(iced_dialog::button("Cancel", Message::Cancelled))
             .width(350)
             .height(234)
             .into()
