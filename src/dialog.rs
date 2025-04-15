@@ -221,7 +221,6 @@ where
     where
         <Theme as container::Catalog>::Class<'a>:
             From<container::StyleFn<'a, Theme>>,
-        <Theme as Catalog>::Class<'a>: Into<StyleFn<'a, Theme>>,
     {
         if self.is_open {
             let contents = Container::new(
@@ -278,7 +277,6 @@ where
     Message: 'a + Clone,
     <Theme as container::Catalog>::Class<'a>:
         From<container::StyleFn<'a, Theme>>,
-    <Theme as Catalog>::Class<'a>: Into<StyleFn<'a, Theme>>,
 {
     fn from(dialog: Dialog<'a, Message, Theme, Renderer>) -> Self {
         dialog.view()
@@ -296,13 +294,12 @@ where
     Theme: 'a + container::Catalog + Catalog,
     <Theme as container::Catalog>::Class<'a>:
         From<container::StyleFn<'a, Theme>>,
-    <Theme as Catalog>::Class<'a>: Into<StyleFn<'a, Theme>>,
 {
-    let style = class.into();
-
     let area = mouse_area(center(opaque(content)).style(move |theme| {
         container::Style {
-            background: Some(style(theme).backdrop_color.into()),
+            background: Some(
+                Catalog::style(theme, &class).backdrop_color.into(),
+            ),
             ..Default::default()
         }
     }));
@@ -336,7 +333,7 @@ pub trait Catalog: text::Catalog + container::Catalog {
     }
 
     /// The [`Style`] of a class.
-    fn style(&self, class: <Self as Catalog>::Class<'_>) -> Style;
+    fn style(&self, class: &<Self as Catalog>::Class<'_>) -> Style;
 }
 
 /// A styling function for a [`Dialog`].
@@ -357,7 +354,7 @@ impl Catalog for Theme {
         })
     }
 
-    fn style(&self, class: <Self as Catalog>::Class<'_>) -> Style {
+    fn style(&self, class: &<Self as Catalog>::Class<'_>) -> Style {
         class(self)
     }
 }
