@@ -3,7 +3,7 @@
 //! # Example
 //! See [here](https://github.com/pml68/iced_dialog/tree/0.13/example)
 pub mod dialog;
-use dialog::Dialog;
+pub use dialog::Dialog;
 use iced_core as core;
 use iced_core::alignment::Horizontal;
 use iced_widget::Button;
