@@ -15,8 +15,12 @@ use iced_widget::{
 ///
 /// [`buttons`]: Dialog::with_buttons
 /// [`title`]: Dialog::title
-pub struct Dialog<'a, Message, Theme, Renderer>
-where
+pub struct Dialog<
+    'a,
+    Message,
+    Theme = iced_widget::Theme,
+    Renderer = iced_widget::Renderer,
+> where
     Renderer: 'a + core::text::Renderer,
     Theme: 'a + Catalog,
 {
