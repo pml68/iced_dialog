@@ -153,6 +153,16 @@ where
         buttons.into_iter().fold(self, Self::push_button)
     }
 
+    /// Sets the backdrop color of the [`Dialog`].
+    pub fn backdrop(self, color: impl Into<Color>) -> Self
+    where
+        <Theme as Catalog>::Class<'a>: From<StyleFn<'a, Theme>>,
+    {
+        let backdrop_color = color.into();
+
+        self.style(move |_theme| Style { backdrop_color })
+    }
+
     /// Sets the style of the [`Dialog`].
     #[must_use]
     pub fn style(mut self, style: impl Fn(&Theme) -> Style + 'a) -> Self
