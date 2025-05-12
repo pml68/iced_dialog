@@ -1,5 +1,5 @@
 use iced::{
-    Element, Length, Task, color,
+    Element, Length, Task,
     widget::{button, center, column, text},
 };
 use iced_dialog::dialog;
