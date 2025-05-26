@@ -6,7 +6,9 @@ use iced_core::{
 };
 use iced_widget::{
     Column, Container, Row, Theme, center, container, mouse_area, opaque,
-    stack, text, vertical_space,
+    stack, text,
+    text::{Fragment, IntoFragment},
+    vertical_space,
 };
 
 /// A message dialog.
@@ -26,7 +28,7 @@ pub struct Dialog<
 {
     is_open: bool,
     base: Element<'a, Message, Theme, Renderer>,
-    title: Option<String>,
+    title: Option<Fragment<'a>>,
     content: Element<'a, Message, Theme, Renderer>,
     buttons: Vec<Element<'a, Message, Theme, Renderer>>,
     font: Option<Renderer::Font>,
@@ -81,8 +83,8 @@ where
     }
 
     /// Sets the [`Dialog`]'s title.
-    pub fn title(mut self, title: impl Into<String>) -> Self {
-        self.title = Some(title.into());
+    pub fn title(mut self, title: impl IntoFragment<'a>) -> Self {
+        self.title = Some(title.into_fragment());
         self
     }
 
