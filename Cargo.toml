@@ -12,20 +12,14 @@ keywords = ["gui", "ui", "graphics", "interface", "widgets"]
 rust-version = "1.85"
 
 [dependencies]
-iced_widget.workspace = true
-iced_core.workspace = true
+iced_widget = { git = "https://github.com/iced-rs/iced", branch = "master" }
+iced_core = { git = "https://github.com/iced-rs/iced", branch = "master", features = ["advanced"] }
 
-[workspace.dependencies.iced_widget]
-git = "https://github.com/iced-rs/iced"
-branch = "master"
+[dev-dependencies]
+iced = { git = "https://github.com/iced-rs/iced", branch = "master" }
 
-[workspace.dependencies.iced_core]
-git = "https://github.com/iced-rs/iced"
-branch = "master"
-features = ["advanced"]
-
-[workspace]
-members = ["example"]
+[[example]]
+name = "save"
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]

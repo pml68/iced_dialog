@@ -18,4 +18,4 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Build example
-      run: cargo build -p example
+      run: cargo build --example save
