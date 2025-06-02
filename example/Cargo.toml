@@ -1,8 +1,0 @@
-[package]
-name = "example"
-version = "0.0.1"
-edition = "2024"
-
-[dependencies]
-iced = { git = "https://github.com/pml68/iced", branch = "feat/rehighlight-on-redraw" }
-iced_dialog = { path = ".." }

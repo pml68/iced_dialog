@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use iced::{
     Element, Length, Task,
     widget::{button, center, column, text},
