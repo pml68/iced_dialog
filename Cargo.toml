@@ -12,15 +12,14 @@ keywords = ["gui", "ui", "graphics", "interface", "widgets"]
 rust-version = "1.80"
 
 [dependencies]
-iced_widget.workspace = true
-iced_core.workspace = true
-
-[workspace.dependencies]
 iced_widget = "0.13.4"
 iced_core = { version = "0.13.2", features = ["advanced"] }
 
-[workspace]
-members = ["example"]
+[dev-dependencies]
+iced = "0.13.1"
+
+[[example]]
+name = "save"
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
