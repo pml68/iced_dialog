@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["default"],"struct":["Dialog","Style"],"trait":["Catalog"],"type":["StyleFn"]};
