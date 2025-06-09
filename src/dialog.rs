@@ -238,7 +238,7 @@ where
         <Theme as container::Catalog>::Class<'a>:
             From<container::StyleFn<'a, Theme>>,
     {
-        if self.is_open {
+        let dialog = self.is_open.then(|| {
             let contents = Container::new(
                 Column::new()
                     .push_maybe(self.title.map(|title| {
@@ -267,7 +267,7 @@ where
             .height(80)
             .padding(self.padding);
 
-            let dialog = Container::new(
+            Container::new(
                 Column::new()
                     .push(contents)
                     .push(vertical_space())
@@ -276,12 +276,10 @@ where
             .width(self.width)
             .height(self.height)
             .class(self.container_class)
-            .clip(true);
+            .clip(true)
+        });
 
-            modal(self.base, dialog, self.class)
-        } else {
-            self.base
-        }
+        modal(self.base, dialog, self.class)
     }
 }
 
@@ -301,7 +299,7 @@ where
 
 fn modal<'a, Message, Theme, Renderer>(
     base: impl Into<Element<'a, Message, Theme, Renderer>>,
-    content: impl Into<Element<'a, Message, Theme, Renderer>>,
+    content: Option<impl Into<Element<'a, Message, Theme, Renderer>>>,
     class: <Theme as Catalog>::Class<'a>,
 ) -> Element<'a, Message, Theme, Renderer>
 where
@@ -311,16 +309,18 @@ where
     <Theme as container::Catalog>::Class<'a>:
         From<container::StyleFn<'a, Theme>>,
 {
-    let area = mouse_area(center(opaque(content)).style(move |theme| {
-        container::Style {
-            background: Some(
-                Catalog::style(theme, &class).backdrop_color.into(),
-            ),
-            ..Default::default()
-        }
-    }));
+    let area = content.map(|content| {
+        opaque(mouse_area(center(opaque(content)).style(move |theme| {
+            container::Style {
+                background: Some(
+                    Catalog::style(theme, &class).backdrop_color.into(),
+                ),
+                ..Default::default()
+            }
+        })))
+    });
 
-    stack![base.into(), opaque(area)].into()
+    stack![base.into()].push_maybe(area).into()
 }
 
 /// The style of a [`Dialog`].
