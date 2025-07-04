@@ -12,11 +12,11 @@ keywords = ["gui", "ui", "graphics", "interface", "widgets"]
 rust-version = "1.85"
 
 [dependencies]
-iced_widget = { git = "https://github.com/iced-rs/iced", branch = "master" }
-iced_core = { git = "https://github.com/iced-rs/iced", branch = "master", features = ["advanced"] }
+iced_widget = "0.14.0-dev"
+iced_core = { version = "0.14.0-dev", features = ["advanced"] }
 
 [dev-dependencies]
-iced = { git = "https://github.com/iced-rs/iced", branch = "master" }
+iced = "0.14.0-dev"
 
 [[example]]
 name = "save"
@@ -47,3 +47,8 @@ useless_conversion = "deny"
 
 [lints.rustdoc]
 broken_intra_doc_links = "forbid"
+
+[patch.crates-io]
+iced_widget = { git = "https://github.com/iced-rs/iced", branch = "master" }
+iced_core = { git = "https://github.com/iced-rs/iced", branch = "master" }
+iced = { git = "https://github.com/iced-rs/iced", branch = "master" }
