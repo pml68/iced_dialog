@@ -6,7 +6,7 @@ It's mostly the dialog from @frgp42's [Fluent Iced Gallery](https://github.com/f
 
 ## Example
 
-```rust
+```rust,no_run
 use iced::{
     Element, Length, Task,
     widget::{button, center, column, text},
