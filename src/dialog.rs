@@ -15,8 +15,19 @@ use iced_widget::{
 ///
 /// Only the content is required, [`buttons`] and the [`title`] are optional.
 ///
+/// The sizing strategy used depends on whether you add any buttons: if you don't, the dialog will
+/// be sized to fit the content similarly to a container. If you *do* add buttons, [`max_width`]
+/// & [`max_height`] (or [`width`] & [`height`] when set to a fixed pixel value) are used. If
+/// these aren't set, [`DEFAULT_MAX_WIDTH`] and/or [`DEFAULT_MAX_HEIGHT`] are used.
+///
 /// [`buttons`]: Dialog::with_buttons
 /// [`title`]: Dialog::title
+/// [`max_width`]: Dialog::max_width
+/// [`max_height`]: Dialog::max_height
+/// [`width`]: Dialog::width
+/// [`height`]: Dialog::height
+/// [`DEFAULT_MAX_WIDTH`]: Dialog::DEFAULT_MAX_WIDTH
+/// [`DEFAULT_MAX_HEIGHT`]: Dialog::DEFAULT_MAX_HEIGHT
 pub struct Dialog<
     'a,
     Message,
@@ -34,6 +45,8 @@ pub struct Dialog<
     font: Option<Renderer::Font>,
     width: Length,
     height: Length,
+    max_width: Option<f32>,
+    max_height: Option<f32>,
     spacing: f32,
     padding: Padding,
     button_alignment: Alignment,
@@ -48,6 +61,16 @@ where
     Theme: 'a + Catalog,
     Message: 'a + Clone,
 {
+    /// The default maximum width of a [`Dialog`].
+    ///
+    /// Check the main documentation of [`Dialog`] to see when this is used.
+    pub const DEFAULT_MAX_WIDTH: f32 = 400.0;
+
+    /// The default maximum height of a [`Dialog`].
+    ///
+    /// Check the main documentation of [`Dialog`] to see when this is used.
+    pub const DEFAULT_MAX_HEIGHT: f32 = 260.0;
+
     /// Creates a new [`Dialog`] with the given base and dialog content.
     pub fn new(
         is_open: bool,
@@ -64,15 +87,20 @@ where
         content: impl Into<Element<'a, Message, Theme, Renderer>>,
         buttons: Vec<Element<'a, Message, Theme, Renderer>>,
     ) -> Self {
+        let content = content.into();
+        let size = content.as_widget().size_hint();
+
         Self {
             is_open,
             base: base.into(),
             title: None,
-            content: content.into(),
+            content,
             buttons,
             font: None,
-            width: 400.into(),
-            height: 260.into(),
+            width: size.width.fluid(),
+            height: size.height.fluid(),
+            max_width: None,
+            max_height: None,
             spacing: 8.0,
             padding: 24.into(),
             button_alignment: Alignment::Start,
@@ -97,6 +125,18 @@ where
     /// Sets the [`Dialog`]'s height.
     pub fn height(mut self, height: impl Into<Length>) -> Self {
         self.height = height.into();
+        self
+    }
+
+    /// Sets the [`Dialog`]'s maximum width.
+    pub fn max_width(mut self, max_width: impl Into<Pixels>) -> Self {
+        self.max_width = Some(max_width.into().0);
+        self
+    }
+
+    /// Sets the [`Dialog`]'s maximum height.
+    pub fn max_height(mut self, max_height: impl Into<Pixels>) -> Self {
+        self.max_height = Some(max_height.into().0);
         self
     }
 
@@ -239,6 +279,9 @@ where
             From<container::StyleFn<'a, Theme>>,
     {
         let dialog = self.is_open.then(|| {
+            let has_title = self.title.is_some();
+            let has_buttons = !self.buttons.is_empty();
+
             let contents = Container::new(
                 Column::new()
                     .push_maybe(self.title.map(|title| {
@@ -255,26 +298,53 @@ where
                             text
                         }
                     }))
-                    .push(vertical_space().height(12))
+                    .push_maybe(
+                        has_title.then_some(vertical_space().height(12)),
+                    )
                     .push(self.content),
             )
-            .width(Length::Fill)
             .padding(self.padding);
 
-            let buttons = Container::new(
-                Row::with_children(self.buttons).spacing(self.spacing),
-            )
-            .height(80)
-            .padding(self.padding);
+            let contents = if has_buttons {
+                contents.width(Length::Fill)
+            } else {
+                contents
+            };
+
+            let buttons = has_buttons.then_some(
+                Container::new(
+                    Row::with_children(self.buttons).spacing(self.spacing),
+                )
+                .height(80)
+                .padding(self.padding),
+            );
+
+            let max_width = self.max_width.unwrap_or(
+                if has_buttons && !matches!(self.width, Length::Fixed(_)) {
+                    Self::DEFAULT_MAX_WIDTH
+                } else {
+                    f32::INFINITY
+                },
+            );
+
+            let max_height = self.max_height.unwrap_or(
+                if has_buttons && !matches!(self.height, Length::Fixed(_)) {
+                    Self::DEFAULT_MAX_HEIGHT
+                } else {
+                    f32::INFINITY
+                },
+            );
 
             Container::new(
                 Column::new()
                     .push(contents)
-                    .push(vertical_space())
-                    .push(buttons),
+                    .push_maybe(has_buttons.then_some(vertical_space()))
+                    .push_maybe(buttons),
             )
             .width(self.width)
             .height(self.height)
+            .max_width(max_width)
+            .max_height(max_height)
             .class(self.container_class)
             .clip(true)
         });
