@@ -6,10 +6,18 @@ version = "0.13.0"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/pml68/iced_dialog"
 repository = "https://github.com/pml68/iced_dialog"
 categories = ["gui"]
 keywords = ["gui", "ui", "graphics", "interface", "widgets"]
 rust-version = "1.80"
+exclude = [
+  ".cargo/config.toml",
+  ".github/*",
+  ".gitignore",
+  "examples/*",
+  "rustfmt.toml"
+]
 
 [dependencies]
 iced_widget = "0.13.4"
