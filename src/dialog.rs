@@ -141,6 +141,20 @@ where
         self
     }
 
+    /// Sets the message that will be produced when the [`Dialog`]'s backdrop is pressed, if `Some`.
+    pub fn on_press_maybe(mut self, on_press: Option<Message>) -> Self
+    where
+        Message: Clone,
+    {
+        self.on_press = if let Some(on_press) = on_press {
+            Some(Box::new(move || on_press.clone()))
+        } else {
+            None
+        };
+
+        self
+    }
+
     /// Sets the [`Dialog`]'s width.
     pub fn width(mut self, width: impl Into<Length>) -> Self {
         self.width = width.into();
