@@ -429,7 +429,7 @@ where
                 },
             );
 
-            Container::new(
+            let content = Container::new(
                 Column::new()
                     .push(contents)
                     .push_maybe(has_buttons.then_some(vertical_space()))
@@ -440,18 +440,33 @@ where
             .max_width(max_width)
             .max_height(max_height)
             .class(self.container_class)
-            .clip(true)
+            .clip(true);
+
+            let backdrop = mouse_area(
+                container(opaque(content))
+                    .style(move |theme| container::Style {
+                        background: Some(
+                            Catalog::style(theme, &self.class)
+                                .backdrop_color
+                                .into(),
+                        ),
+                        ..Default::default()
+                    })
+                    .padding(self.padding_outer)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                    .align_x(self.horizontal_alignment)
+                    .align_y(self.vertical_alignment),
+            );
+
+            if let Some(on_press) = self.on_press {
+                opaque(backdrop.on_press(on_press()))
+            } else {
+                opaque(backdrop)
+            }
         });
 
-        modal(
-            self.base,
-            dialog,
-            self.on_press,
-            self.horizontal_alignment,
-            self.vertical_alignment,
-            self.padding_outer,
-            self.class,
-        )
+        stack![self.base].push_maybe(dialog).into()
     }
 }
 
@@ -467,48 +482,6 @@ where
     fn from(dialog: Dialog<'a, Message, Theme, Renderer>) -> Self {
         dialog.view()
     }
-}
-
-fn modal<'a, Message, Theme, Renderer>(
-    base: impl Into<Element<'a, Message, Theme, Renderer>>,
-    content: Option<impl Into<Element<'a, Message, Theme, Renderer>>>,
-    on_press: Option<impl Fn() -> Message + 'a>,
-    horizontal_alignment: alignment::Horizontal,
-    vertical_alignment: alignment::Vertical,
-    padding: Padding,
-    class: <Theme as Catalog>::Class<'a>,
-) -> Element<'a, Message, Theme, Renderer>
-where
-    Message: 'a + Clone,
-    Renderer: 'a + core::Renderer,
-    Theme: 'a + container::Catalog + Catalog,
-    <Theme as container::Catalog>::Class<'a>:
-        From<container::StyleFn<'a, Theme>>,
-{
-    let area = content.map(|content| {
-        let backdrop = mouse_area(
-            container(opaque(content))
-                .style(move |theme| container::Style {
-                    background: Some(
-                        Catalog::style(theme, &class).backdrop_color.into(),
-                    ),
-                    ..Default::default()
-                })
-                .padding(padding)
-                .width(Length::Fill)
-                .height(Length::Fill)
-                .align_x(horizontal_alignment)
-                .align_y(vertical_alignment),
-        );
-
-        if let Some(on_press) = on_press {
-            opaque(backdrop.on_press(on_press()))
-        } else {
-            opaque(backdrop)
-        }
-    });
-
-    stack![base.into()].push_maybe(area).into()
 }
 
 /// The style of a [`Dialog`].
