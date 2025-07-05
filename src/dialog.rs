@@ -42,6 +42,7 @@ pub struct Dialog<
     title: Option<Fragment<'a>>,
     content: Element<'a, Message, Theme, Renderer>,
     buttons: Vec<Element<'a, Message, Theme, Renderer>>,
+    on_press: Option<Box<dyn Fn() -> Message + 'a>>,
     font: Option<Renderer::Font>,
     width: Length,
     height: Length,
@@ -96,6 +97,7 @@ where
             title: None,
             content,
             buttons,
+            on_press: None,
             font: None,
             width: size.width.fluid(),
             height: size.height.fluid(),
@@ -113,6 +115,27 @@ where
     /// Sets the [`Dialog`]'s title.
     pub fn title(mut self, title: impl IntoFragment<'a>) -> Self {
         self.title = Some(title.into_fragment());
+        self
+    }
+
+    /// Sets the message that will be produced when the [`Dialog`]'s backdrop is pressed.
+    pub fn on_press(mut self, on_press: Message) -> Self
+    where
+        Message: Clone,
+    {
+        self.on_press = Some(Box::new(move || on_press.clone()));
+        self
+    }
+
+    /// Sets the message that will be produced when the [`Dialog`]'s backdrop is pressed.
+    ///
+    /// This is analogous to [`Dialog::on_press`], but using a closure to produce
+    /// the message.
+    pub fn on_press_with(
+        mut self,
+        on_press: impl Fn() -> Message + 'a,
+    ) -> Self {
+        self.on_press = Some(Box::new(on_press));
         self
     }
 
@@ -349,7 +372,7 @@ where
             .clip(true)
         });
 
-        modal(self.base, dialog, self.class)
+        modal(self.base, dialog, self.on_press, self.class)
     }
 }
 
@@ -370,6 +393,7 @@ where
 fn modal<'a, Message, Theme, Renderer>(
     base: impl Into<Element<'a, Message, Theme, Renderer>>,
     content: Option<impl Into<Element<'a, Message, Theme, Renderer>>>,
+    on_press: Option<impl Fn() -> Message + 'a>,
     class: <Theme as Catalog>::Class<'a>,
 ) -> Element<'a, Message, Theme, Renderer>
 where
@@ -380,14 +404,21 @@ where
         From<container::StyleFn<'a, Theme>>,
 {
     let area = content.map(|content| {
-        opaque(mouse_area(center(opaque(content)).style(move |theme| {
-            container::Style {
-                background: Some(
-                    Catalog::style(theme, &class).backdrop_color.into(),
-                ),
-                ..Default::default()
-            }
-        })))
+        let backdrop =
+            mouse_area(center(opaque(content)).style(move |theme| {
+                container::Style {
+                    background: Some(
+                        Catalog::style(theme, &class).backdrop_color.into(),
+                    ),
+                    ..Default::default()
+                }
+            }));
+
+        if let Some(on_press) = on_press {
+            opaque(backdrop.on_press(on_press()))
+        } else {
+            opaque(backdrop)
+        }
     });
 
     stack![base.into()].push_maybe(area).into()
