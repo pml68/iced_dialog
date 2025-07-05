@@ -1,12 +1,10 @@
 //! Dialogs can be used to provide users with
 //! important information and make them act on it.
 use iced_core::{
-    self as core, Alignment, Color, Element, Length, Padding, Pixels,
-    alignment::Vertical, color,
+    self as core, Color, Element, Length, Padding, Pixels, alignment, color,
 };
 use iced_widget::{
-    Column, Container, Row, Theme, center, container, mouse_area, opaque,
-    stack, text,
+    Column, Container, Row, Theme, container, mouse_area, opaque, stack, text,
     text::{Fragment, IntoFragment},
     vertical_space,
 };
@@ -48,9 +46,11 @@ pub struct Dialog<
     height: Length,
     max_width: Option<f32>,
     max_height: Option<f32>,
+    horizontal_alignment: alignment::Horizontal,
+    vertical_alignment: alignment::Vertical,
     spacing: f32,
     padding: Padding,
-    button_alignment: Alignment,
+    button_alignment: alignment::Vertical,
     class: <Theme as Catalog>::Class<'a>,
     title_class: <Theme as text::Catalog>::Class<'a>,
     container_class: <Theme as container::Catalog>::Class<'a>,
@@ -103,9 +103,11 @@ where
             height: size.height.fluid(),
             max_width: None,
             max_height: None,
+            horizontal_alignment: alignment::Horizontal::Center,
+            vertical_alignment: alignment::Vertical::Center,
             spacing: 8.0,
             padding: 24.into(),
-            button_alignment: Alignment::Start,
+            button_alignment: alignment::Vertical::Top,
             class: <Theme as Catalog>::default(),
             title_class: <Theme as Catalog>::default_title(),
             container_class: <Theme as Catalog>::default_container(),
@@ -163,6 +165,48 @@ where
         self
     }
 
+    /// Aligns the [`Dialog`] to the left.
+    pub fn align_left(self) -> Self {
+        self.align_x(alignment::Horizontal::Left)
+    }
+
+    /// Aligns the [`Dialog`] to the right.
+    pub fn align_right(self) -> Self {
+        self.align_x(alignment::Horizontal::Right)
+    }
+
+    /// Aligns the [`Dialog`] to the top.
+    pub fn align_top(self) -> Self {
+        self.align_y(alignment::Vertical::Top)
+    }
+
+    /// Aligns the [`Dialog`] to the bottom.
+    pub fn align_bottom(self) -> Self {
+        self.align_y(alignment::Vertical::Bottom)
+    }
+
+    /// Sets the [`Dialog`]'s alignment for the horizontal axis.
+    ///
+    /// [`Dialog`]s are horizontally centered by default.
+    pub fn align_x(
+        mut self,
+        alignment: impl Into<alignment::Horizontal>,
+    ) -> Self {
+        self.horizontal_alignment = alignment.into();
+        self
+    }
+
+    /// Sets the [`Dialog`]'s alignment for the vertical axis.
+    ///
+    /// [`Dialog`]s are vertically centered by default.
+    pub fn align_y(
+        mut self,
+        alignment: impl Into<alignment::Vertical>,
+    ) -> Self {
+        self.vertical_alignment = alignment.into();
+        self
+    }
+
     /// Sets the [`Dialog`]'s padding.
     pub fn padding(mut self, padding: impl Into<Padding>) -> Self {
         self.padding = padding.into();
@@ -176,8 +220,11 @@ where
     }
 
     /// Sets the vertical alignment of the [`Dialog`]'s buttons.
-    pub fn align_buttons(mut self, align: impl Into<Vertical>) -> Self {
-        self.button_alignment = Alignment::from(align.into());
+    pub fn align_buttons(
+        mut self,
+        align: impl Into<alignment::Vertical>,
+    ) -> Self {
+        self.button_alignment = align.into();
         self
     }
 
@@ -336,7 +383,9 @@ where
 
             let buttons = has_buttons.then_some(
                 Container::new(
-                    Row::with_children(self.buttons).spacing(self.spacing),
+                    Row::with_children(self.buttons)
+                        .spacing(self.spacing)
+                        .align_y(self.button_alignment),
                 )
                 .height(80)
                 .padding(self.padding),
@@ -372,7 +421,14 @@ where
             .clip(true)
         });
 
-        modal(self.base, dialog, self.on_press, self.class)
+        modal(
+            self.base,
+            dialog,
+            self.on_press,
+            self.horizontal_alignment,
+            self.vertical_alignment,
+            self.class,
+        )
     }
 }
 
@@ -394,6 +450,8 @@ fn modal<'a, Message, Theme, Renderer>(
     base: impl Into<Element<'a, Message, Theme, Renderer>>,
     content: Option<impl Into<Element<'a, Message, Theme, Renderer>>>,
     on_press: Option<impl Fn() -> Message + 'a>,
+    horizontal_alignment: alignment::Horizontal,
+    vertical_alignment: alignment::Vertical,
     class: <Theme as Catalog>::Class<'a>,
 ) -> Element<'a, Message, Theme, Renderer>
 where
@@ -404,15 +462,19 @@ where
         From<container::StyleFn<'a, Theme>>,
 {
     let area = content.map(|content| {
-        let backdrop =
-            mouse_area(center(opaque(content)).style(move |theme| {
-                container::Style {
+        let backdrop = mouse_area(
+            container(opaque(content))
+                .style(move |theme| container::Style {
                     background: Some(
                         Catalog::style(theme, &class).backdrop_color.into(),
                     ),
                     ..Default::default()
-                }
-            }));
+                })
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .align_x(horizontal_alignment)
+                .align_y(vertical_alignment),
+        );
 
         if let Some(on_press) = on_press {
             opaque(backdrop.on_press(on_press()))
