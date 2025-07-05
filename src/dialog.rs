@@ -49,7 +49,8 @@ pub struct Dialog<
     horizontal_alignment: alignment::Horizontal,
     vertical_alignment: alignment::Vertical,
     spacing: f32,
-    padding: Padding,
+    padding_inner: Padding,
+    padding_outer: Padding,
     button_alignment: alignment::Vertical,
     class: <Theme as Catalog>::Class<'a>,
     title_class: <Theme as text::Catalog>::Class<'a>,
@@ -106,7 +107,8 @@ where
             horizontal_alignment: alignment::Horizontal::Center,
             vertical_alignment: alignment::Vertical::Center,
             spacing: 8.0,
-            padding: 24.into(),
+            padding_inner: 24.into(),
+            padding_outer: Padding::ZERO,
             button_alignment: alignment::Vertical::Top,
             class: <Theme as Catalog>::default(),
             title_class: <Theme as Catalog>::default_title(),
@@ -221,9 +223,15 @@ where
         self
     }
 
-    /// Sets the [`Dialog`]'s padding.
-    pub fn padding(mut self, padding: impl Into<Padding>) -> Self {
-        self.padding = padding.into();
+    /// Sets the [`Dialog`]'s inner padding.
+    pub fn padding_inner(mut self, padding: impl Into<Padding>) -> Self {
+        self.padding_inner = padding.into();
+        self
+    }
+
+    /// Sets the [`Dialog`]'s outer padding (sometimes called "margin").
+    pub fn padding_outer(mut self, padding: impl Into<Padding>) -> Self {
+        self.padding_outer = padding.into();
         self
     }
 
@@ -387,7 +395,7 @@ where
                     )
                     .push(self.content),
             )
-            .padding(self.padding);
+            .padding(self.padding_inner);
 
             let contents = if has_buttons {
                 contents.width(Length::Fill)
@@ -402,7 +410,7 @@ where
                         .align_y(self.button_alignment),
                 )
                 .height(80)
-                .padding(self.padding),
+                .padding(self.padding_inner),
             );
 
             let max_width = self.max_width.unwrap_or(
@@ -441,6 +449,7 @@ where
             self.on_press,
             self.horizontal_alignment,
             self.vertical_alignment,
+            self.padding_outer,
             self.class,
         )
     }
@@ -466,6 +475,7 @@ fn modal<'a, Message, Theme, Renderer>(
     on_press: Option<impl Fn() -> Message + 'a>,
     horizontal_alignment: alignment::Horizontal,
     vertical_alignment: alignment::Vertical,
+    padding: Padding,
     class: <Theme as Catalog>::Class<'a>,
 ) -> Element<'a, Message, Theme, Renderer>
 where
@@ -484,6 +494,7 @@ where
                     ),
                     ..Default::default()
                 })
+                .padding(padding)
                 .width(Length::Fill)
                 .height(Length::Fill)
                 .align_x(horizontal_alignment)
