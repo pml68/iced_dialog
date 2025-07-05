@@ -65,6 +65,7 @@ impl State {
             .push_button(iced_dialog::button("Cancel", Message::Cancelled))
             .width(350)
             .height(234)
+            .on_press(Message::Cancelled)
             .into()
     }
 }
