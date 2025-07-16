@@ -24,8 +24,6 @@ use iced_widget::{
 /// [`max_height`]: Dialog::max_height
 /// [`width`]: Dialog::width
 /// [`height`]: Dialog::height
-/// [`DEFAULT_MAX_WIDTH`]: Dialog::DEFAULT_MAX_WIDTH
-/// [`DEFAULT_MAX_HEIGHT`]: Dialog::DEFAULT_MAX_HEIGHT
 pub struct Dialog<
     'a,
     Message,
@@ -63,16 +61,6 @@ where
     Theme: 'a + Catalog,
     Message: 'a + Clone,
 {
-    /// The default maximum width of a [`Dialog`].
-    ///
-    /// Check the main documentation of [`Dialog`] to see when this is used.
-    pub const DEFAULT_MAX_WIDTH: f32 = 400.0;
-
-    /// The default maximum height of a [`Dialog`].
-    ///
-    /// Check the main documentation of [`Dialog`] to see when this is used.
-    pub const DEFAULT_MAX_HEIGHT: f32 = 260.0;
-
     /// Creates a new [`Dialog`] with the given base and dialog content.
     pub fn new(
         is_open: bool,
@@ -415,7 +403,7 @@ where
 
             let max_width = self.max_width.unwrap_or(
                 if has_buttons && !matches!(self.width, Length::Fixed(_)) {
-                    Self::DEFAULT_MAX_WIDTH
+                    DEFAULT_MAX_WIDTH
                 } else {
                     f32::INFINITY
                 },
@@ -423,7 +411,7 @@ where
 
             let max_height = self.max_height.unwrap_or(
                 if has_buttons && !matches!(self.height, Length::Fixed(_)) {
-                    Self::DEFAULT_MAX_HEIGHT
+                    DEFAULT_MAX_HEIGHT
                 } else {
                     f32::INFINITY
                 },
@@ -469,6 +457,16 @@ where
         stack![self.base].push_maybe(dialog).into()
     }
 }
+
+/// The default maximum width of a [`Dialog`].
+///
+/// Check the main documentation of [`Dialog`] to see when this is used.
+pub const DEFAULT_MAX_WIDTH: f32 = 400.0;
+
+/// The default maximum height of a [`Dialog`].
+///
+/// Check the main documentation of [`Dialog`] to see when this is used.
+pub const DEFAULT_MAX_HEIGHT: f32 = 260.0;
 
 impl<'a, Message, Theme, Renderer> From<Dialog<'a, Message, Theme, Renderer>>
     for Element<'a, Message, Theme, Renderer>
