@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_MAX_HEIGHT","DEFAULT_MAX_WIDTH"],"fn":["default"],"struct":["Dialog","Style"],"trait":["Catalog"],"type":["StyleFn"]};
