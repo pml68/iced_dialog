@@ -4,7 +4,7 @@ use iced_core::{
     self as core, Color, Element, Length, Padding, Pixels, alignment, color,
 };
 use iced_widget::{
-    Column, Container, Row, Theme, container, mouse_area, opaque, stack, text,
+    Container, Row, Theme, column, container, mouse_area, opaque, stack, text,
     text::{Fragment, IntoFragment},
     vertical_space,
 };
@@ -136,11 +136,8 @@ where
     where
         Message: Clone,
     {
-        self.on_press = if let Some(on_press) = on_press {
-            Some(Box::new(move || on_press.clone()))
-        } else {
-            None
-        };
+        self.on_press =
+            on_press.map(|message| Box::new(move || message.clone()) as _);
 
         self
     }
@@ -362,27 +359,22 @@ where
             let has_title = self.title.is_some();
             let has_buttons = !self.buttons.is_empty();
 
-            let contents = Container::new(
-                Column::new()
-                    .push_maybe(self.title.map(|title| {
-                        let text = text(title)
-                            .size(20)
-                            .line_height(text::LineHeight::Absolute(Pixels(
-                                26.0,
-                            )))
-                            .class(self.title_class);
+            let contents = Container::new(column![
+                self.title.map(|title| {
+                    let text = text(title)
+                        .size(20)
+                        .line_height(text::LineHeight::Absolute(Pixels(26.0)))
+                        .class(self.title_class);
 
-                        if let Some(font) = self.font {
-                            text.font(font)
-                        } else {
-                            text
-                        }
-                    }))
-                    .push_maybe(
-                        has_title.then_some(vertical_space().height(12)),
-                    )
-                    .push(self.content),
-            )
+                    if let Some(font) = self.font {
+                        text.font(font)
+                    } else {
+                        text
+                    }
+                }),
+                has_title.then_some(vertical_space().height(12)),
+                self.content
+            ])
             .padding(self.padding_inner);
 
             let contents = if has_buttons {
@@ -417,12 +409,11 @@ where
                 },
             );
 
-            let content = Container::new(
-                Column::new()
-                    .push(contents)
-                    .push_maybe(has_buttons.then_some(vertical_space()))
-                    .push_maybe(buttons),
-            )
+            let content = Container::new(column![
+                contents,
+                has_buttons.then_some(vertical_space()),
+                buttons,
+            ])
             .width(self.width)
             .height(self.height)
             .max_width(max_width)
@@ -454,7 +445,7 @@ where
             }
         });
 
-        stack![self.base].push_maybe(dialog).into()
+        stack![self.base, dialog].into()
     }
 }
 
