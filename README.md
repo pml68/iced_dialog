@@ -8,7 +8,7 @@ It's mostly the dialog from @frgp42's [Fluent Iced Gallery](https://github.com/f
 
 ```rust,no_run
 use iced::{
-    Element, Length, Task,
+    Element, Task,
     widget::{button, center, column, text},
 };
 use iced_dialog::dialog;
@@ -16,7 +16,7 @@ use iced_dialog::dialog;
 #[derive(Default)]
 struct State {
     is_open: bool,
-    action_text: String,
+    action_text: &'static str,
 }
 
 #[derive(Debug, Clone)]
@@ -35,11 +35,11 @@ impl State {
         match message {
             Message::OpenDialog => self.is_open = true,
             Message::Saved => {
-                self.action_text = "User saved their work".to_owned();
+                self.action_text = "User saved their work";
                 self.is_open = false;
             }
             Message::Cancelled => {
-                self.action_text = "User cancelled the dialog".to_owned();
+                self.action_text = "User cancelled the dialog";
                 self.is_open = false;
             }
         }
@@ -49,19 +49,17 @@ impl State {
     fn view(&self) -> Element<'_, Message> {
         let base = center(
             column![
-                text(&self.action_text),
+                text(self.action_text),
                 button("Open Dialog").on_press(Message::OpenDialog)
             ]
             .spacing(14.0),
-        )
-        .width(Length::Fill)
-        .height(Length::Fill);
+        );
 
         let dialog_content = text("Do you want to save?");
 
         dialog(self.is_open, base, dialog_content)
             .title("Save")
-            .push_button(iced_dialog::button("Save", Message::Saved))
+            .push_button(iced_dialog::button("Save work", Message::Saved))
             .push_button(iced_dialog::button("Cancel", Message::Cancelled))
             .width(350)
             .height(234)

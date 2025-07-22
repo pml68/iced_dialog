@@ -16,6 +16,8 @@ jobs:
     - name: Check lints
       run: cargo lint
     - name: Run tests
-      run: cargo test --verbose
+      run: | 
+        cargo test --verbose --doc
+        cargo test --verbose --all-targets
     - name: Build example
       run: cargo build --example save

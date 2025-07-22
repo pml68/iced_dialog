@@ -16,7 +16,7 @@ exclude = [
   ".github/*",
   ".gitignore",
   "examples/*",
-  "rustfmt.toml"
+  "rustfmt.toml",
 ]
 
 [dependencies]
@@ -25,6 +25,7 @@ iced_core = { version = "0.14.0-dev", features = ["advanced"] }
 
 [dev-dependencies]
 iced = "0.14.0-dev"
+iced_test = "0.14.0-dev"
 
 [[example]]
 name = "save"
@@ -60,3 +61,4 @@ broken_intra_doc_links = "forbid"
 iced_widget = { git = "https://github.com/iced-rs/iced", branch = "master" }
 iced_core = { git = "https://github.com/iced-rs/iced", branch = "master" }
 iced = { git = "https://github.com/iced-rs/iced", branch = "master" }
+iced_test = { git = "https://github.com/iced-rs/iced", branch = "master" }
