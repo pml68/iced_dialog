@@ -1,9 +1,8 @@
 #![doc = include_str!("../README.md")]
 pub mod dialog;
 pub use dialog::Dialog;
-use iced_core as core;
-use iced_core::alignment::Horizontal;
 use iced_widget::Button;
+use iced_widget::core;
 use iced_widget::{container, text};
 
 /// Creates a new [`Dialog`] with the given base and dialog content.
@@ -37,7 +36,7 @@ where
         text(content)
             .size(14)
             .line_height(text::LineHeight::Absolute(core::Pixels(20.0)))
-            .align_x(Horizontal::Center),
+            .align_x(core::Alignment::Center),
     )
     .on_press(message)
     .height(32)

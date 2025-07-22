@@ -1,13 +1,12 @@
 //! Dialogs can be used to provide users with
 //! important information and make them act on it.
-use iced_core::{
-    self as core, Color, Element, Length, Padding, Pixels, alignment, color,
-};
 use iced_widget::{
     Container, Row, Theme, column, container, mouse_area, opaque, stack, text,
     text::{Fragment, IntoFragment},
     vertical_space,
 };
+
+use crate::core::{self, Color, Element, Length, Padding, Pixels, alignment};
 
 /// A message dialog.
 ///
@@ -513,11 +512,7 @@ impl Catalog for Theme {
     }
 
     fn default_container<'a>() -> <Self as container::Catalog>::Class<'a> {
-        Box::new(|theme| {
-            container::background(
-                theme.extended_palette().background.base.color,
-            )
-        })
+        Box::new(|theme| container::background(theme.palette().background))
     }
 
     fn style(&self, class: &<Self as Catalog>::Class<'_>) -> Style {
@@ -526,8 +521,8 @@ impl Catalog for Theme {
 }
 
 /// The default style of a [`Dialog`].
-pub fn default(_theme: &Theme) -> Style {
+pub fn default<Theme>(_theme: &Theme) -> Style {
     Style {
-        backdrop_color: color!(0x000000, 0.3),
+        backdrop_color: core::color!(0x000000, 0.3),
     }
 }
