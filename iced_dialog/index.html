@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="iced_dialog"><title>iced_dialog - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-84e720fa.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="iced_dialog" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0 (29483883e 2025-08-04)" data-channel="1.89.0" data-search-js="search-92309212.js" data-settings-js="settings-5514c975.js" ><script src="../static.files/storage-4e99c027.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../iced_dialog/index.html">iced_<wbr>dialog</a><span class="version">0.14.0-dev</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#iced_dialog" title="iced_dialog">iced_dialog</a><ul><li><a href="#example" title="Example">Example</a></li></ul></li></ul><h3><a href="#reexports">Crate Items</a></h3><ul class="block"><li><a href="#reexports" title="Re-exports">Re-exports</a></li><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#functions" title="Functions">Functions</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>iced_dialog</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/iced_dialog/lib.rs.html#1-44">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="iced_dialog"><a class="doc-anchor" href="#iced_dialog">§</a>iced_dialog</h2>
+<p>Custom dialog for <a href="https://iced.rs"><code>iced</code></a></p>
+<p>It’s mostly the dialog from @frgp42’s <a href="https://github.com/frgp42/fluent_iced_gallery">Fluent Iced Gallery</a>, but made into a “widget”</p>
+<h3 id="example"><a class="doc-anchor" href="#example">§</a>Example</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>iced::{
+    Element, Task,
+    widget::{button, center, column, text},
+};
+<span class="kw">use </span>iced_dialog::dialog;
+
+<span class="attr">#[derive(Default)]
+</span><span class="kw">struct </span>State {
+    is_open: bool,
+    action_text: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
+}
+
+<span class="attr">#[derive(Debug, Clone)]
+</span><span class="kw">enum </span>Message {
+    OpenDialog,
+    Saved,
+    Cancelled,
+}
+
+<span class="kw">fn </span>main() -&gt; iced::Result {
+    iced::run(State::update, State::view)
+}
+
+<span class="kw">impl </span>State {
+    <span class="kw">fn </span>update(<span class="kw-2">&amp;mut </span><span class="self">self</span>, message: Message) -&gt; Task&lt;Message&gt; {
+        <span class="kw">match </span>message {
+            Message::OpenDialog =&gt; <span class="self">self</span>.is_open = <span class="bool-val">true</span>,
+            Message::Saved =&gt; {
+                <span class="self">self</span>.action_text = <span class="string">"User saved their work"</span>;
+                <span class="self">self</span>.is_open = <span class="bool-val">false</span>;
+            }
+            Message::Cancelled =&gt; {
+                <span class="self">self</span>.action_text = <span class="string">"User cancelled the dialog"</span>;
+                <span class="self">self</span>.is_open = <span class="bool-val">false</span>;
+            }
+        }
+        Task::none()
+    }
+
+    <span class="kw">fn </span>view(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Element&lt;<span class="lifetime">'_</span>, Message&gt; {
+        <span class="kw">let </span>base = center(
+            <span class="macro">column!</span>[
+                text(<span class="self">self</span>.action_text),
+                button(<span class="string">"Open Dialog"</span>).on_press(Message::OpenDialog)
+            ]
+            .spacing(<span class="number">14.0</span>),
+        );
+
+        <span class="kw">let </span>dialog_content = text(<span class="string">"Do you want to save?"</span>);
+
+        dialog(<span class="self">self</span>.is_open, base, dialog_content)
+            .title(<span class="string">"Save"</span>)
+            .push_button(iced_dialog::button(<span class="string">"Save work"</span>, Message::Saved))
+            .push_button(iced_dialog::button(<span class="string">"Cancel"</span>, Message::Cancelled))
+            .width(<span class="number">350</span>)
+            .height(<span class="number">234</span>)
+            .on_press(Message::Cancelled)
+            .into()
+    }
+}</code></pre></div>
+<p>You can also run the above example:</p>
+<div class="example-wrap"><pre class="language-bash"><code>cargo run -p example</code></pre></div></div></details><h2 id="reexports" class="section-header">Re-exports<a href="#reexports" class="anchor">§</a></h2><dl class="item-table reexports"><dt id="reexport.Dialog"><code>pub use dialog::<a class="struct" href="dialog/struct.Dialog.html" title="struct iced_dialog::dialog::Dialog">Dialog</a>;</code></dt></dl><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="dialog/index.html" title="mod iced_dialog::dialog">dialog</a></dt><dd>Dialogs can be used to provide users with
+important information and make them act on it.</dd></dl><h2 id="functions" class="section-header">Functions<a href="#functions" class="anchor">§</a></h2><dl class="item-table"><dt><a class="fn" href="fn.button.html" title="fn iced_dialog::button">button</a></dt><dd>Pre-styled <a href="https://docs.iced.rs/iced/widget/struct.Button.html"><code>Button</code></a> for <a href="dialog/struct.Dialog.html" title="struct iced_dialog::dialog::Dialog"><code>Dialog</code></a>s.</dd><dt><a class="fn" href="fn.dialog.html" title="fn iced_dialog::dialog">dialog</a></dt><dd>Creates a new <a href="dialog/struct.Dialog.html" title="struct iced_dialog::dialog::Dialog"><code>Dialog</code></a> with the given base and dialog content.</dd></dl><script type="text/json" id="notable-traits-data">{"&[u8]":"<h3>Notable traits for <code>&amp;[<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.89.0/std/primitive.u8.html\">u8</a>]</code></h3><pre><code><div class=\"where\">impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.89.0/std/io/trait.Read.html\" title=\"trait std::io::Read\">Read</a> for &amp;[<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.89.0/std/primitive.u8.html\">u8</a>]</div>"}</script></section></div></main></body></html>
