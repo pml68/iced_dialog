@@ -10,7 +10,7 @@ homepage = "https://github.com/pml68/iced_dialog"
 repository = "https://github.com/pml68/iced_dialog"
 categories = ["gui"]
 keywords = ["gui", "ui", "graphics", "interface", "widgets"]
-rust-version = "1.85"
+rust-version = "1.88"
 exclude = [
   ".cargo/config.toml",
   ".github/*",
